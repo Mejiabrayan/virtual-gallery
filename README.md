@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Virtual Gallery
 
-## Getting Started
+A 3D virtual gallery where users can upload and showcase their artwork.
 
-First, run the development server:
+## Database Setup Instructions
+
+To set up the database schema for the Virtual Gallery:
+
+1. Log in to the [Supabase Dashboard](https://app.supabase.com/)
+2. Open your project: "virtual gallery"
+3. Navigate to the "SQL Editor" in the left sidebar
+4. Click "New Query"
+5. Copy and paste the entire contents of the `migration_script.sql` file
+6. Click "Run" to execute the script
+
+This will create:
+- The `gallery_users` table for user IDs
+- The `frame_positions` table for available frames
+- The `gallery_images` table for uploaded images
+- A storage bucket called `gallery_images`
+- Security policies for the data
+
+## Project Structure
+
+- `/app/api/gallery/*` - API endpoints for user creation and image uploads
+- `/components/art-gallery.tsx` - 3D gallery viewer component
+- `/components/join-gallery.tsx` - User registration component
+- `/components/image-upload.tsx` - Image upload component
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install dependencies
+bun install
+
+# Run the development server
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technologies Used
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next.js
+- Supabase (Database & Storage)
+- Three.js (3D Gallery)
+- TypeScript
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+           
