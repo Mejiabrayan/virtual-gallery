@@ -138,8 +138,10 @@ type ToastOptions = {
 }
 
 const TOAST_LIMIT = 5
-const TOAST_REMOVE_DELAY = 5000
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const TOAST_REMOVE_DELAY = 1000
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",

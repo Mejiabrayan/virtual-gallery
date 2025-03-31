@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { TablesInsert } from '@/database.types'
+import { revalidatePath } from "next/cache"
 
 export async function POST() {
   try {
@@ -14,22 +15,20 @@ export async function POST() {
       user_id: randomId
     }
     
-    const { error } = await supabase
+    const { data: user, error } = await supabase
       .from('gallery_users')
       .insert([newUser])
+      .select()
+      .single()
       
-    if (error) {
-      console.error('Error creating user:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    if (error) throw error
     
-    // Return the user ID
-    return NextResponse.json({ userId: randomId })
+    // Revalidate the gallery page to show the new user
+    revalidatePath('/gallery')
+    
+    return NextResponse.json(user)
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json(
-      { error: 'Failed to create user' },
-      { status: 500 }
-    )
+    console.error('Error creating user:', error)
+    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
   }
 } 

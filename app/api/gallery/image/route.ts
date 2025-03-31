@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { TablesInsert } from '@/database.types'
+import { revalidatePath } from "next/cache"
 
 export async function POST(req: Request) {
   try {
@@ -163,6 +164,10 @@ export async function POST(req: Request) {
     }
     
     console.log("Image upload successful");
+    
+    // Revalidate the gallery page to show the new image
+    revalidatePath('/gallery')
+    
     return NextResponse.json({
       success: true,
       url: publicUrl,

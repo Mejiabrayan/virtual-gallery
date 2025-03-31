@@ -20,6 +20,16 @@ interface ArtGalleryProps {
   framePositions: FramePosition[]
 }
 
+// Add NPC types
+interface NPC {
+  model: THREE.Group
+  mixer: THREE.AnimationMixer
+  target: THREE.Vector3
+  currentFrame: string | null
+  viewingTime: number
+  state: 'walking' | 'viewing'
+}
+
 export default function ArtGallery({ images, framePositions }: ArtGalleryProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
@@ -807,9 +817,128 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
 
     window.addEventListener("resize", handleResize)
 
+    // Add NPC management
+    const npcs: NPC[] = []
+    const NUM_NPCS = 3
+    
+    // Create simple box character
+    const createBoxCharacter = () => {
+      const group = new THREE.Group()
+      
+      // Body
+      const bodyGeometry = new THREE.BoxGeometry(0.3, 0.6, 0.2)
+      const bodyMaterial = new THREE.MeshStandardMaterial({ 
+        color: new THREE.Color(Math.random(), Math.random(), Math.random()),
+        roughness: 0.7 
+      })
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial)
+      body.position.y = 0.3
+      group.add(body)
+      
+      // Head
+      const headGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.2)
+      const head = new THREE.Mesh(headGeometry, bodyMaterial)
+      head.position.y = 0.7
+      group.add(head)
+      
+      return group
+    }
+
+    // Initialize NPCs with box characters
+    const initializeNPCs = () => {
+      for (let i = 0; i < NUM_NPCS; i++) {
+        const npcModel = createBoxCharacter()
+        
+        // Random starting position
+        const startX = (Math.random() - 0.5) * 8
+        const startZ = (Math.random() - 0.5) * 8
+        npcModel.position.set(startX, 0, startZ)
+        
+        scene.add(npcModel)
+        
+        npcs.push({
+          model: npcModel,
+          mixer: new THREE.AnimationMixer(npcModel), // Dummy mixer since we don't have animations yet
+          target: new THREE.Vector3(startX, 0, startZ),
+          currentFrame: null,
+          viewingTime: 0,
+          state: 'walking'
+        })
+      }
+    }
+
+    // Update NPC behavior
+    const updateNPCs = (deltaTime: number) => {
+      const WALKING_SPEED = 0.8 // Units per second
+      
+      npcs.forEach((npc) => {
+        if (npc.state === 'walking') {
+          // Move towards target
+          const direction = npc.target.clone().sub(npc.model.position)
+          
+          if (direction.length() < 0.1) {
+            // Reached target, start viewing
+            npc.state = 'viewing'
+            npc.viewingTime = Math.random() * 5 + 3 // View for 3-8 seconds
+            
+            // Make NPC face the frame
+            npc.model.lookAt(npc.target)
+          } else {
+            // Continue walking
+            direction.normalize()
+            npc.model.position.add(direction.multiplyScalar(deltaTime * WALKING_SPEED))
+            
+            // Rotate model to face walking direction
+            npc.model.lookAt(npc.target)
+            
+            // Add subtle bobbing motion while walking
+            npc.model.position.y = Math.sin(Date.now() * 0.01) * 0.03
+          }
+        } else {
+          // Viewing state
+          npc.viewingTime -= deltaTime
+          
+          if (npc.viewingTime <= 0) {
+            // Pick new random frame to walk to
+            const randomFrame = framePositions[Math.floor(Math.random() * framePositions.length)]
+            const framePos = getFramePosition(randomFrame.id)
+            
+            // Set target slightly in front of frame
+            const offset = new THREE.Vector3(
+              Math.random() * 2 - 1, // Random x offset
+              0,
+              1 // Stand back from frame
+            )
+            
+            if (framePos.rotationY === 0) {
+              // Back wall
+              npc.target.set(framePos.x + offset.x, 0, framePos.z + offset.z)
+            } else if (framePos.rotationY === Math.PI / 2) {
+              // Right wall
+              npc.target.set(framePos.x - offset.z, 0, framePos.z + offset.x)
+            } else {
+              // Left wall
+              npc.target.set(framePos.x + offset.z, 0, framePos.z + offset.x)
+            }
+            
+            npc.currentFrame = randomFrame.id
+            npc.state = 'walking'
+          }
+        }
+      })
+    }
+    
+    // Initialize NPCs
+    initializeNPCs()
+
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate)
+      
+      const deltaTime = clock.getDelta()
+      
+      // Update NPCs
+      updateNPCs(deltaTime)
 
       if (controlsRef.current) {
         controlsRef.current.update()
@@ -819,7 +948,10 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
         rendererRef.current.render(sceneRef.current, cameraRef.current)
       }
     }
-
+    
+    // Add clock for animation timing
+    const clock = new THREE.Clock()
+    
     animate()
 
     // Create a button to toggle auto-rotation
