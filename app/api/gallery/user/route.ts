@@ -26,7 +26,8 @@ export async function POST() {
     // Revalidate the gallery page to show the new user
     revalidatePath('/gallery')
     
-    return NextResponse.json(user)
+    // Return the user_id as userId for frontend consistency
+    return NextResponse.json({ userId: user.user_id })
   } catch (error) {
     console.error('Error creating user:', error)
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
