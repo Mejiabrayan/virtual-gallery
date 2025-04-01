@@ -70,13 +70,14 @@ export async function POST(req: Request) {
     try {
       const { data: frameData } = await supabase
         .from('gallery_images')
-        .select()
+        .select('user_id, frame_id')
         .eq('frame_id', frameId)
+        .single()
       
-      if (frameData && frameData.length > 0) {
-        console.error(`Frame ${frameId} is already taken`);
+      if (frameData) {
+        console.error(`Frame ${frameId} is already taken by user ${frameData.user_id}`);
         return NextResponse.json(
-          { error: 'Frame position already taken' },
+          { error: `This frame is already taken. Please select a different frame position.` },
           { status: 400 }
         )
       }
@@ -165,8 +166,8 @@ export async function POST(req: Request) {
     
     console.log("Image upload successful");
     
-    // Revalidate the gallery page to show the new image
-    revalidatePath('/gallery')
+    // Revalidate the entire app layout
+    revalidatePath('/', 'layout')
     
     return NextResponse.json({
       success: true,

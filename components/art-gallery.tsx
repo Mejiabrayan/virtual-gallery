@@ -265,7 +265,7 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
       floor.receiveShadow = true
       scene.add(floor)
 
-      // Ceiling
+      // Ceiling - Increased height from 3 to 3.5
       const ceilingGeometry = new THREE.PlaneGeometry(10, 10)
       const ceilingMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
@@ -274,10 +274,10 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
       })
       const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial)
       ceiling.rotation.x = Math.PI / 2
-      ceiling.position.y = 3
+      ceiling.position.y = 3.5
       scene.add(ceiling)
 
-      // Walls
+      // Walls - Adjust height to match new ceiling
       const wallMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         roughness: 0.05,
@@ -285,40 +285,40 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
       })
 
       // Back wall
-      const backWallGeometry = new THREE.PlaneGeometry(10, 3)
+      const backWallGeometry = new THREE.PlaneGeometry(10, 3.5)
       const backWall = new THREE.Mesh(backWallGeometry, wallMaterial)
       backWall.position.z = -5
-      backWall.position.y = 1.5
+      backWall.position.y = 1.75
       scene.add(backWall)
 
       // Front wall with opening
-      const frontWallLeft = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), wallMaterial)
+      const frontWallLeft = new THREE.Mesh(new THREE.PlaneGeometry(3, 3.5), wallMaterial)
       frontWallLeft.position.z = 5
       frontWallLeft.position.x = -3.5
-      frontWallLeft.position.y = 1.5
+      frontWallLeft.position.y = 1.75
       frontWallLeft.rotation.y = Math.PI
       scene.add(frontWallLeft)
 
-      const frontWallRight = new THREE.Mesh(new THREE.PlaneGeometry(3, 3), wallMaterial)
+      const frontWallRight = new THREE.Mesh(new THREE.PlaneGeometry(3, 3.5), wallMaterial)
       frontWallRight.position.z = 5
       frontWallRight.position.x = 3.5
-      frontWallRight.position.y = 1.5
+      frontWallRight.position.y = 1.75
       frontWallRight.rotation.y = Math.PI
       scene.add(frontWallRight)
 
       // Left wall
-      const leftWallGeometry = new THREE.PlaneGeometry(10, 3)
+      const leftWallGeometry = new THREE.PlaneGeometry(10, 3.5)
       const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial)
       leftWall.position.x = -5
-      leftWall.position.y = 1.5
+      leftWall.position.y = 1.75
       leftWall.rotation.y = Math.PI / 2
       scene.add(leftWall)
 
       // Right wall
-      const rightWallGeometry = new THREE.PlaneGeometry(10, 3)
+      const rightWallGeometry = new THREE.PlaneGeometry(10, 3.5)
       const rightWall = new THREE.Mesh(rightWallGeometry, wallMaterial)
       rightWall.position.x = 5
-      rightWall.position.y = 1.5
+      rightWall.position.y = 1.75
       rightWall.rotation.y = -Math.PI / 2
       scene.add(rightWall)
 
@@ -443,8 +443,8 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
 
     // Add paintings
     const addPaintings = () => {
+      const frameBorderWidth = 0.08 // Reduced from 0.1
       const frameDepth = 0.05
-      const frameBorderWidth = 0.1
 
       const createFrame = (
         width: number,
@@ -478,7 +478,7 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
         })
 
         // Make frame thicker for featured images
-        const borderWidth = featured ? frameBorderWidth * 2 : frameBorderWidth
+        const borderWidth = featured ? frameBorderWidth * 1.5 : frameBorderWidth // Adjusted multiplier
         const frameDepthActual = featured ? frameDepth * 1.5 : frameDepth
 
         // Top frame border
@@ -954,60 +954,124 @@ export default function ArtGallery({ images, framePositions }: ArtGalleryProps) 
     
     animate()
 
-    // Create a button to toggle auto-rotation
-    const rotationToggle = document.createElement('button');
-    rotationToggle.style.position = 'absolute';
-    rotationToggle.style.bottom = '20px';
-    rotationToggle.style.left = '20px';
-    rotationToggle.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    rotationToggle.style.color = 'white';
-    rotationToggle.style.border = 'none';
-    rotationToggle.style.padding = '10px 16px';
-    rotationToggle.style.borderRadius = '8px';
-    rotationToggle.style.fontSize = '14px';
-    rotationToggle.style.fontFamily = 'Arial, sans-serif';
-    rotationToggle.style.cursor = 'pointer';
-    rotationToggle.style.zIndex = '1000';
-    rotationToggle.style.display = 'flex';
-    rotationToggle.style.alignItems = 'center';
-    rotationToggle.style.transition = 'background-color 0.3s';
-    rotationToggle.innerHTML = '⟳ Auto-rotate: ON';
-    rotationToggle.title = 'Toggle auto-rotation';
-    
-    rotationToggle.addEventListener('click', () => {
+    // Create controls container
+    const controlsContainer = document.createElement('div');
+    controlsContainer.style.position = 'absolute';
+    controlsContainer.style.bottom = '20px';
+    controlsContainer.style.left = '20px';
+    controlsContainer.style.display = 'flex';
+    controlsContainer.style.alignItems = 'center';
+    controlsContainer.style.gap = '12px';
+    controlsContainer.style.zIndex = '1000';
+    controlsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    controlsContainer.style.padding = '10px';
+    controlsContainer.style.borderRadius = '12px';
+    controlsContainer.style.backdropFilter = 'blur(10px)';
+    controlsContainer.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+
+    // Create audio element
+    const audio = new Audio('/music.mp3');
+    audio.loop = true;
+    audio.volume = 0.3; // Set initial volume to 30%
+
+    // Create rotation toggle button
+    const rotateButton = document.createElement('button');
+    rotateButton.style.border = 'none';
+    rotateButton.style.background = 'none';
+    rotateButton.style.color = 'white';
+    rotateButton.style.cursor = 'pointer';
+    rotateButton.style.fontSize = '20px';
+    rotateButton.style.display = 'flex';
+    rotateButton.style.alignItems = 'center';
+    rotateButton.style.padding = '8px';
+    rotateButton.style.borderRadius = '8px';
+    rotateButton.style.transition = 'background-color 0.3s';
+    rotateButton.innerHTML = '⟳';
+    rotateButton.title = 'Toggle auto-rotation';
+
+    // Create audio toggle button
+    const audioButton = document.createElement('button');
+    audioButton.style.border = 'none';
+    audioButton.style.background = 'none';
+    audioButton.style.color = 'white';
+    audioButton.style.cursor = 'pointer';
+    audioButton.style.fontSize = '20px';
+    audioButton.style.display = 'flex';
+    audioButton.style.alignItems = 'center';
+    audioButton.style.padding = '8px';
+    audioButton.style.borderRadius = '8px';
+    audioButton.style.transition = 'background-color 0.3s';
+    audioButton.innerHTML = '🔊';
+    audioButton.title = 'Toggle music';
+
+    // Create volume slider
+    const volumeSlider = document.createElement('input');
+    volumeSlider.type = 'range';
+    volumeSlider.min = '0';
+    volumeSlider.max = '100';
+    volumeSlider.value = '30';
+    volumeSlider.style.width = '80px';
+    volumeSlider.style.accentColor = '#ffffff';
+
+    // Add hover effects
+    [rotateButton, audioButton].forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+      });
+      button.addEventListener('mouseleave', () => {
+        button.style.backgroundColor = 'transparent';
+      });
+    });
+
+    // Handle rotation toggle
+    rotateButton.addEventListener('click', () => {
       if (controlsRef.current) {
         controlsRef.current.autoRotate = !controlsRef.current.autoRotate;
-        rotationToggle.innerHTML = controlsRef.current.autoRotate ? '⟳ Auto-rotate: ON' : '⟳ Auto-rotate: OFF';
-        rotationToggle.style.backgroundColor = controlsRef.current.autoRotate ? 'rgba(0, 128, 0, 0.8)' : 'rgba(0, 0, 0, 0.8)';
+        rotateButton.style.opacity = controlsRef.current.autoRotate ? '1' : '0.5';
       }
     });
-    
-    container.appendChild(rotationToggle);
-    
-    // Prevent default touch behaviors that might interfere with controls
-    renderer.domElement.addEventListener('touchstart', function(e) {
-      if (e.touches.length > 1) {
-        e.preventDefault();
+
+    // Handle audio toggle
+    let isPlaying = true; // Start with audio playing
+    audioButton.addEventListener('click', () => {
+      if (isPlaying) {
+        audio.pause();
+        audioButton.innerHTML = '🔈';
+        audioButton.style.opacity = '0.5';
+      } else {
+        audio.play();
+        audioButton.innerHTML = '🔊';
+        audioButton.style.opacity = '1';
       }
-    }, { passive: false });
-    
-    renderer.domElement.addEventListener('touchmove', function(e) {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-    
-    // Add additional handling for two-finger gestures on touchpad
-    renderer.domElement.addEventListener('pointermove', function(e) {
-      if (e.isPrimary === false && e.pointerType === 'touch') {
-        stopAutoRotation();
-      }
+      isPlaying = !isPlaying;
     });
+
+    // Handle volume change
+    volumeSlider.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      audio.volume = parseInt(target.value) / 100;
+    });
+
+    // Start playing audio by default
+    audio.play().catch(err => {
+      console.log('Audio autoplay blocked:', err);
+      isPlaying = false;
+      audioButton.innerHTML = '🔈';
+      audioButton.style.opacity = '0.5';
+    });
+
+    // Add elements to controls container
+    controlsContainer.appendChild(rotateButton);
+    controlsContainer.appendChild(audioButton);
+    controlsContainer.appendChild(volumeSlider);
+    container.appendChild(controlsContainer);
 
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize)
-
+      audio.pause();
+      audio.src = '';
+      
       if (rendererRef.current && container) {
         container.removeChild(rendererRef.current.domElement)
       }

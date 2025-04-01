@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/components/ui/use-toast"
 
-export default function JoinGallery() {
+interface JoinGalleryProps {
+  onJoinSuccess: (userId: string) => void
+}
+
+export default function JoinGallery({ onJoinSuccess }: JoinGalleryProps) {
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   
@@ -14,8 +18,9 @@ export default function JoinGallery() {
     const savedUserId = localStorage.getItem('gallery_user_id')
     if (savedUserId) {
       setUserId(savedUserId)
+      onJoinSuccess(savedUserId) // Notify parent of existing user
     }
-  }, [])
+  }, [onJoinSuccess])
   
   const handleJoin = async () => {
     try {
@@ -37,6 +42,7 @@ export default function JoinGallery() {
       // Save user ID to local storage
       localStorage.setItem('gallery_user_id', data.userId)
       setUserId(data.userId)
+      onJoinSuccess(data.userId) // Notify parent of new user
       
       toast({
         title: "Welcome to the gallery!",

@@ -23,8 +23,8 @@ export async function POST() {
       
     if (error) throw error
     
-    // Revalidate the gallery page to show the new user
-    revalidatePath('/gallery')
+    // Revalidate the entire app layout
+    revalidatePath('/', 'layout')
     
     // Return the user_id as userId for frontend consistency
     return NextResponse.json({ userId: user.user_id })

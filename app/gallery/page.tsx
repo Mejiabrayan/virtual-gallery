@@ -48,6 +48,13 @@ export default function GalleryPage() {
     }
   }, [])
 
+  // Handle successful join
+  const handleJoinSuccess = (newUserId: string) => {
+    setUserId(newUserId)
+    localStorage.setItem("gallery_user_id", newUserId)
+    setActiveTab("gallery") // Switch back to gallery view
+  }
+
   // Fetch gallery data
   const fetchGalleryData = async () => {
     try {
@@ -153,7 +160,7 @@ export default function GalleryPage() {
 
           <TabsContent value="join" className="mt-4">
             <div className="container mx-auto max-w-md py-8">
-              <JoinGallery />
+              <JoinGallery onJoinSuccess={handleJoinSuccess} />
             </div>
           </TabsContent>
 

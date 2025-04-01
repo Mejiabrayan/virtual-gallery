@@ -213,7 +213,13 @@ export default function ImageUpload({ onSuccess }: ImageUploadProps) {
                 ) : (
                   availableFrames.map((frame) => (
                     <SelectItem key={frame.id} value={frame.id}>
-                      {frame.name} ({frame.wall} wall)
+                      {frame.id === 'center' ? 'Featured Center (Large frame, back wall center)' :
+                       frame.id === 'backLeft' ? 'Back Wall Left (Next to featured frame)' :
+                       frame.id === 'backRight' ? 'Back Wall Right (Next to featured frame)' :
+                       frame.id === 'leftWall1' ? 'Left Wall Front (Near entrance)' :
+                       frame.id === 'leftWall2' ? 'Left Wall Back (Near back wall)' :
+                       frame.id === 'rightWall1' ? 'Right Wall Front (Near entrance)' :
+                       'Right Wall Back (Near back wall)'}
                     </SelectItem>
                   ))
                 )}
